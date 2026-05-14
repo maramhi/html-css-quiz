@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>مراجعة HTML & CSS</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:        #0d1117;
+  --card:      #161b22;
+  --card2:     #1c2128;
+  --border:    #30363d;
+  --blue:      #58a6ff;
+  --green:     #2ea043;
+  --green-bg:  #122519;
+  --green-t:   #3fb950;
+  --red:       #da3633;
+  --red-bg:    #2d1212;
+  --red-t:     #ff7b72;
+  --muted:     #7d8590;
+  --text:      #e6edf3;
+  --reveal-bg: #0d1f33;
+  --reveal-b:  #388bfd;
+  --reveal-t:  #79c0ff;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Tajawal',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding-bottom:4rem;
+}
+
+/* ── رأس الصفحة ── */
+header{
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  padding:0 1.5rem;
+  height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:10;
+}
+.logo{display:flex;align-items:center;gap:.55rem;}
+.logo h1{font-size:1.05rem;font-weight:700;color:var(--blue);}
+.score-badge{
+  background:var(--card2);border:1px solid var(--border);
+  border-radius:20px;padding:.28rem .9rem;
+  font-size:.85rem;color:var(--muted);
+  display:flex;align-items:center;gap:.35rem;
+}
+.score-badge b{color:var(--green-t);font-size:.98rem;}
+
+/* ── شريط التقدم ── */
+.progress{height:3px;background:var(--border);}
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--blue),var(--green-t));
+  width:0%;transition:width .35s;
+}
+
+/* ── الأسئلة ── */
+.questions{
+  max-width:780px;margin:2rem auto;
+  padding:0 1.2rem;
+  display:flex;flex-direction:column;gap:1.4rem;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;
+  transition:border-color .2s;
+}
+.card:hover{border-color:rgba(88,166,255,.22);}
+
+.q-head{
+  padding:1.2rem 1.3rem .85rem;
+  display:flex;align-items:flex-start;gap:.85rem;
+}
+.q-num{
+  min-width:32px;height:32px;
+  background:rgba(88,166,255,.1);
+  border:1px solid rgba(88,166,255,.22);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--blue);font-weight:700;font-size:.84rem;
+  flex-shrink:0;margin-top:2px;
+}
+.q-text{font-size:1.05rem;font-weight:700;line-height:1.65;flex:1;}
+
+/* ── خيارات ── */
+.options{
+  padding:.1rem 1.3rem .55rem;
+  display:flex;flex-direction:column;gap:.48rem;
+}
+.opt{
+  display:flex;align-items:center;gap:.8rem;
+  padding:.7rem .9rem;
+  background:var(--card2);
+  border:1.5px solid var(--border);
+  border-radius:10px;
+  cursor:pointer;
+  transition:all .17s;
+  user-select:none;
+}
+.opt:hover:not(.done){
+  border-color:var(--blue);
+  background:rgba(88,166,255,.06);
+}
+.opt-letter{
+  min-width:28px;height:28px;
+  border-radius:6px;
+  background:rgba(125,133,144,.12);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:.82rem;color:var(--muted);
+  flex-shrink:0;transition:all .17s;
+}
+.opt-text{flex:1;font-size:.97rem;font-weight:500;direction:rtl;}
+.opt-icon{font-size:.9rem;display:none;flex-shrink:0;}
+
+/* صحيح */
+.opt.correct{background:var(--green-bg);border-color:var(--green);}
+.opt.correct .opt-letter{background:var(--green);border-color:var(--green);color:#fff;}
+.opt.correct .opt-text{color:var(--green-t);}
+.opt.correct .opt-icon{display:block;}
+
+/* خطأ */
+.opt.wrong{background:var(--red-bg);border-color:var(--red);animation:shake .35s;}
+.opt.wrong .opt-letter{background:var(--red);border-color:var(--red);color:#fff;}
+.opt.wrong .opt-text{color:var(--red-t);}
+.opt.wrong .opt-icon{display:block;}
+
+.opt.dim{opacity:.32;pointer-events:none;}
+.opt.done{cursor:default;}
+
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-5px)}
+  40%{transform:translateX(5px)}
+  60%{transform:translateX(-3px)}
+  80%{transform:translateX(3px)}
+}
+
+/* ── إظهار الإجابة ── */
+.reveal-row{
+  padding:.65rem 1.3rem 1.05rem;
+  display:flex;flex-direction:column;gap:.52rem;
+}
+.btn-reveal{
+  align-self:flex-start;
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);border-radius:7px;
+  padding:.38rem .82rem;
+  font-family:'Tajawal',sans-serif;font-size:.84rem;font-weight:500;
+  cursor:pointer;transition:all .17s;
+}
+.btn-reveal:hover{
+  border-color:var(--reveal-b);
+  color:var(--reveal-t);
+  background:rgba(56,139,253,.08);
+}
+.ans-box{
+  display:none;
+  background:var(--reveal-bg);
+  border:1px solid var(--reveal-b);
+  border-radius:8px;
+  padding:.62rem 1rem;
+  color:var(--reveal-t);
+  font-size:.92rem;font-weight:600;
+  align-items:center;gap:.45rem;
+}
+.ans-box.show{display:flex;animation:fadeUp .2s;}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(-4px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ── بطاقة النتيجة ── */
+.result-card{
+  max-width:780px;margin:0 auto;
+  padding:0 1.2rem 1rem;
+}
+.result-inner{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:2rem;text-align:center;
+}
+.result-inner p{color:var(--muted);margin-bottom:.4rem;font-size:.95rem;}
+.result-score{font-size:2.8rem;font-weight:900;color:var(--green-t);}
+.result-total{font-size:.9rem;color:var(--muted);}
+
+@media(max-width:560px){
+  .questions{padding:0 .8rem;}
+  .q-text{font-size:.97rem;}
+  .opt-text{font-size:.9rem;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span style="font-size:1.25rem">📚</span>
+    <h1>مراجعة HTML &amp; CSS</h1>
+  </div>
+  <div class="score-badge">الإجابات الصحيحة <b id="sc">0</b></div>
+</header>
+<div class="progress"><div class="progress-fill" id="pf"></div></div>
+
+<div class="questions" id="quiz"></div>
+
+<div class="result-card">
+  <div class="result-inner">
+    <p>مجموع إجاباتك الصحيحة</p>
+    <div class="result-score" id="rs">0</div>
+    <div class="result-total" id="rt"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  ٢٩ سؤالاً — الإجابات الصحيحة من مفتاح الإجابة
+// ══════════════════════════════════════════════════
+const Q = [
+  {
+    q: "ما هي الوظيفة الأساسية للوسم &lt;ul&gt; في HTML؟",
+    opts: ["إنشاء قائمة غير مرتبة", "إنشاء قائمة مرتبة", "إنشاء قائمة عناصر", "تحديد صورة"],
+    ans: 0   // A
+  },
+  {
+    q: "ما نوع input المستخدم للاختيار المتعدد من متعدد؟",
+    opts: ["radio", "checkbox", "text", "submit"],
+    ans: 1   // B
+  },
+  {
+    q: "النماذج تُستخدم في صفحات الويب للسماح للمستخدم بإدخال البيانات أو تعديلها",
+    opts: ["صواب", "خطأ"],
+    ans: 0   // A
+  },
+  {
+    q: "خاصية background-color في CSS تُستخدم لتغيير لون خلفية العنصر",
+    opts: ["صواب", "خطأ"],
+    ans: 0   // A
+  },
+  {
+    q: "HTML هي لغة برمجة تستخدم لإنشاء صفحات الإنترنت",
+    opts: ["صواب", "خطأ"],
+    ans: 0   // A
+  },
+  {
+    q: "ما خاصية CSS المستخدمة لتغيير حجم الخط؟",
+    opts: ["font-weight", "font-size", "font-style", "text-align"],
+    ans: 1   // B
+  },
+  {
+    q: "يمكن إدراج الصوت في HTML باستخدام الوسم &lt;video&gt;",
+    opts: ["صواب", "خطأ"],
+    ans: 1   // B
+  },
+  {
+    q: "لمحاذاة النص إلى المنتصف في CSS نستخدم الأمر:",
+    opts: ["text-align:right;", "text-align:center;", "text-align:left;", "text-align:end;"],
+    ans: 1   // B
+  },
+  {
+    q: "كيف يمكن تغيير لون النص إلى الأخضر في HTML و CSS؟",
+    opts: ["color:green;", "color:blue;", "font-weight", "background-color:blue;"],
+    ans: 0   // A
+  },
+  {
+    q: "ما هي الوظيفة الأساسية للوسم &lt;ol&gt; في HTML؟",
+    opts: ["إنشاء قائمة مرتبة", "إنشاء قائمة عناصر", "تحديد جدول", "تحديد صورة"],
+    ans: 0   // A
+  },
+  {
+    q: "وسم &lt;label&gt; يُستخدم لإعطاء الحقول تسمية واضحة للمستخدم",
+    opts: ["صواب", "خطأ"],
+    ans: 0   // A
+  },
+  {
+    q: "داخل الوسم &lt;img&gt; تستخدم الخاصية width والخاصية height لـ:",
+    opts: ["تحديد العرض والارتفاع للصورة", "لعرض نص بتنسيق عنوان", "لتحديد جدول", "إدراج مقطع فيديو"],
+    ans: 0   // A
+  },
+  {
+    q: "ما الوسم المستخدم لإنشاء نموذج؟",
+    opts: ["&lt;p&gt;", "&lt;form&gt;", "&lt;div&gt;", "&lt;table&gt;"],
+    ans: 1   // B
+  },
+  {
+    q: "نستطيع إنشاء موقع متكامل باستخدام لغة الـ CSS فقط لوحدها",
+    opts: ["صواب", "خطأ"],
+    ans: 1   // B
+  },
+  {
+    q: "وسم &lt;select&gt; يُستخدم لإنشاء قائمة منسدلة في النماذج",
+    opts: ["صواب", "خطأ"],
+    ans: 0   // A
+  },
+  {
+    q: "الوسم &lt;br&gt; يستخدم للكتابة بداية سطر جديد",
+    opts: ["صواب", "خطأ"],
+    ans: 0   // A
+  },
+  {
+    q: "ما هي الوظيفة الأساسية للوسم &lt;h1&gt; في HTML؟",
+    opts: ["لعرض نص بتنسيق فقرة", "لعرض نص بتنسيق عنوان", "لتحديد جدول", "لتحديد صورة"],
+    ans: 1   // B
+  },
+  {
+    q: "داخل الوسم &lt;a&gt; تستخدم الخاصية href لـ:",
+    opts: ["تحديد العرض والارتفاع للصورة", "إنشاء قائمة عناصر", "يحدد المكان المراد الانتقال له عند الضغط على الرابط", "إدراج مقطع فيديو"],
+    ans: 2   // C
+  },
+  {
+    q: "كيف يمكن تغيير لون الخلفية إلى الأزرق في HTML و CSS؟",
+    opts: ["color:green;", "color:blue;", "font-weight", "background-color:blue;"],
+    ans: 3   // D
+  },
+  {
+    q: "الطريقة حيث يتم إدراج جميع أوامر CSS في ملف نصي خارجي يتم استدعاءه:",
+    opts: ["طريقة التضمين", "طريقة الملف الخارجي", "الطريقة السطرية", "ليس مما سبق"],
+    ans: 1   // B
+  },
+  {
+    q: "&lt;head&gt;...&lt;/head&gt; المنطقة الخاصة بكتابة المحتوى الذي سيظهر في المتصفح",
+    opts: ["صواب", "خطأ"],
+    ans: 1   // B
+  },
+  {
+    q: "الطريقة حيث يتم إدراج جميع أوامر CSS داخل رأس الصفحة في HTML:",
+    opts: ["طريقة التضمين", "طريقة الملف الخارجي", "الطريقة السطرية", "ليس مما سبق"],
+    ans: 0   // A
+  },
+  {
+    q: "ما هو الوسم المستخدم لإدراج ارتباط تشعبي؟",
+    opts: ["&lt;a&gt;", "&lt;img&gt;", "&lt;div&gt;", "&lt;p&gt;"],
+    ans: 0   // A
+  },
+  {
+    q: "يمكن إنشاء نموذج من نوع اختيار واحد من متعدد باستخدام الأمر:",
+    opts: ['&lt;input type="email"&gt;', '&lt;input type="text"&gt;', '&lt;input type="radio"&gt;', "submit"],
+    ans: 2   // C
+  },
+  {
+    q: "يمكن استخدام CSS داخل ملف HTML أو في ملف منفصل",
+    opts: ["صواب", "خطأ"],
+    ans: 0   // A
+  },
+  {
+    q: "ما هو العنصر الذي يستخدم لإضافة صورة في صفحة HTML؟",
+    opts: ["&lt;a&gt;", "&lt;img&gt;", "&lt;div&gt;", "&lt;p&gt;"],
+    ans: 1   // B
+  },
+  {
+    q: "يتم التحكم في شكل الموقع من ناحية الخطوط والألوان من خلال لغة الـ HTML",
+    opts: ["صواب", "خطأ"],
+    ans: 1   // B
+  },
+  {
+    q: "العبارة داخل &lt;h1&gt; ستظهر بحجم أكبر من العبارة داخل &lt;h2&gt;",
+    opts: ["صواب", "خطأ"],
+    ans: 0   // A
+  },
+  {
+    q: "ما هي الوظيفة الأساسية للوسم &lt;p&gt; في HTML؟",
+    opts: ["لتحديد فقرة نصية", "لتحديد عنوان رئيسي", "لتحديد جدول", "لتحديد صورة"],
+    ans: 0   // A
+  },
+];
+
+const LETTERS = ["أ","ب","ج","د"];
+let score = 0;
+const done = {};
+
+function build(){
+  const wrap = document.getElementById('quiz');
+  document.getElementById('rt').textContent = `من ${Q.length} سؤال`;
+
+  Q.forEach((item, i) => {
+    const optsHtml = item.opts.map((o, oi) => `
+      <div class="opt" id="o${i}_${oi}"
+           onclick="pick(${i},${oi},${item.ans},${item.opts.length})">
+        <div class="opt-letter">${LETTERS[oi] || oi+1}</div>
+        <div class="opt-text">${o}</div>
+        <div class="opt-icon" id="ic${i}_${oi}"></div>
+      </div>`).join('');
+
+    wrap.innerHTML += `
+    <div class="card">
+      <div class="q-head">
+        <div class="q-num">${i+1}</div>
+        <div class="q-text">${item.q}</div>
+      </div>
+      <div class="options">${optsHtml}</div>
+      <div class="reveal-row">
+        <button class="btn-reveal" onclick="reveal(${i})">💡 إظهار الإجابة</button>
+        <div class="ans-box" id="ab${i}">
+          ✅ الإجابة الصحيحة: <strong>${item.opts[item.ans]}</strong>
+        </div>
+      </div>
+    </div>`;
+  });
+}
+
+function pick(qi, chosen, correct, total){
+  if(done[qi] !== undefined) return;
+  done[qi] = chosen === correct;
+  if(done[qi]) score++;
+
+  for(let i = 0; i < total; i++){
+    const el = document.getElementById(`o${qi}_${i}`);
+    el.classList.add('done');
+    if(i === correct){
+      el.classList.add('correct');
+      document.getElementById(`ic${qi}_${i}`).textContent = '✅';
+    } else if(i === chosen && i !== correct){
+      el.classList.add('wrong');
+      document.getElementById(`ic${qi}_${i}`).textContent = '❌';
+    } else {
+      el.classList.add('dim');
+    }
+  }
+
+  document.getElementById('sc').textContent = score;
+  document.getElementById('rs').textContent = score;
+  const pct = Object.keys(done).length / Q.length * 100;
+  document.getElementById('pf').style.width = pct + '%';
+}
+
+function reveal(qi){
+  document.getElementById(`ab${qi}`).classList.toggle('show');
+}
+
+build();
+</script>
+</body>
+</html>
